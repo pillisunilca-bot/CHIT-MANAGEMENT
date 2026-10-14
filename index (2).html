@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Chit Manager</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+:root{--bg:#eef2f0;--card:#fff;--ink:#15302b;--mut:#5d716c;--line:#cfdad6;--acc:#1f4e79;--on:#fff;--warn:#a65d00;--bad:#a32a2a;--ok:#1d6b45;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1b18;--card:#172622;--ink:#e3eeea;--mut:#8fa5a0;--line:#2a3f3a;--acc:#6fa8dc;--on:#0f1b18;--warn:#e0a24a;--bad:#e27b7b;--ok:#6fcf9a}}
+:root[data-theme="dark"]{--bg:#0f1b18;--card:#172622;--ink:#e3eeea;--mut:#8fa5a0;--line:#2a3f3a;--acc:#6fa8dc;--on:#0f1b18;--warn:#e0a24a;--bad:#e27b7b;--ok:#6fcf9a}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "IBM Plex Sans",system-ui,sans-serif;font-variant-numeric:tabular-nums}
+header{padding:14px 18px 0}h1{margin:0;font-size:21px;font-weight:600}header p{margin:2px 0 0;color:var(--mut);font-size:13px}
+.app{display:grid;grid-template-columns:220px minmax(0,1fr);max-width:1320px;margin:12px auto 0}
+nav{padding:6px 10px;border-right:1px solid var(--line);position:sticky;top:0;align-self:start}
+nav h4{margin:16px 10px 4px;font-size:12.5px;font-weight:500;color:var(--mut)}nav h4:first-child{margin-top:0}
+nav button{display:block;width:100%;text-align:left;background:none;border:0;border-radius:5px;padding:8px 10px;font:inherit;color:var(--ink);cursor:pointer}
+nav button:hover{background:var(--card)}nav button.on{background:var(--acc);color:var(--on);font-weight:500}nav button[disabled]{color:var(--mut);cursor:default;background:none}
+main{padding:4px 18px 40px;min-width:0}
+.pt{font-size:21px;margin:0 0 2px}.ph{margin-bottom:14px}
+.todo{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line)}.todo:last-child{border:0}.todo button.b{margin:0 0 0 6px}
+@media(max-width:760px){.app{display:block;margin-top:0}nav{display:flex;overflow-x:auto;gap:4px;border-right:0;border-bottom:1px solid var(--line);position:static;padding:8px 10px}nav h4{display:none}nav button{width:auto;white-space:nowrap}}
+section{background:var(--card);border:1px solid var(--line);border-radius:6px;padding:14px;margin-bottom:16px}
+h2{font-size:16px;margin:0 0 10px}
+.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+label{display:block;font-size:12.5px;color:var(--mut)}
+input,select{width:100%;padding:7px 8px;margin-top:2px;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--ink);font:inherit}
+button.b{background:var(--acc);color:var(--on);border:0;border-radius:4px;padding:8px 14px;font:inherit;font-weight:500;cursor:pointer;margin-top:10px}
+button.b.s{background:none;color:var(--acc);border:1px solid var(--acc);margin-right:6px}
+.w{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--line);white-space:nowrap}th{color:var(--mut);font-weight:500}
+td.n,th.n{text-align:right}.msg{background:var(--card);border-left:4px solid var(--warn);padding:9px 12px;margin-bottom:12px}
+.k{display:flex;gap:22px;flex-wrap:wrap}.k div{min-width:120px}.k b{display:block;font-size:22px;font-weight:600}.k span{color:var(--mut);font-size:13px}
+.bad{color:var(--bad)}.ok{color:var(--ok)}.wn{color:var(--warn)}.mut{color:var(--mut)}.pv{margin-top:8px;font-size:13.5px;color:var(--mut)}
+.steps{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}.sb{background:none;border:1px solid var(--line);color:var(--mut);border-radius:20px;padding:6px 14px;font:inherit;cursor:pointer}.sb.on{background:var(--acc);color:var(--on);border-color:var(--acc)}
+.g2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px 18px}label i{font-style:normal;margin-left:6px;font-size:12px}
+h3{font-size:14px;margin:22px 0 10px;padding-top:14px;border-top:1px solid var(--line)}h3:first-child{margin-top:0;border:0;padding-top:0}
+.hint{color:var(--mut);font-size:13px;margin:0 0 14px}.nav{display:flex;gap:8px;margin-top:20px}.nav button.b{margin-top:0}
+.mt td:nth-child(8),.mt2 td:nth-child(5){white-space:normal;min-width:220px}[hidden]{display:none!important}
+td .sb{padding:2px 10px;font-size:12px}
+#mods{display:flex;gap:4px;padding:0 18px;border-bottom:1px solid var(--line);overflow-x:auto}#mods button{background:none;border:0;border-bottom:3px solid transparent;color:var(--mut);padding:10px 14px;font:inherit;cursor:pointer;white-space:nowrap}#mods button.on{color:var(--ink);border-color:var(--acc);font-weight:600}
+textarea{width:100%;padding:8px;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--ink);font:12px/1.4 monospace}
+.ind{margin-left:18px;border-left:1px solid var(--line);padding-left:10px}.lg{padding:2px 0;font-size:14px}details>summary{cursor:pointer;padding:3px 0}
+</style></head><body>
+<header><h1>Chit Manager</h1><p>Groups, auctions, collections and outstanding. Data stays in this browser.</p></header>
+<div id="mods"></div><div class="app"><nav id="nav"></nav><main id="main"></main></div>
+<script>
+const K='chitmgr1';let S={groups:[],members:[],tickets:[],auctions:[],pays:[],agents:[],adjs:[],n:1};
+try{const r=localStorage.getItem(K);if(r)S=JSON.parse(r)}catch(x){}
+S.agents=S.agents||[];S.adjs=S.adjs||[];if(!S.coa)S.coa=seedCoa();
+if(S.agents.length){const mp={};S.agents.forEach(a=>{const id=S.n++;mp[a.id]=id;S.members.push({id,code:a.code,name:a.name,mobile:a.mobile,mem:false,ag:a.type,comm:a.comm,area:a.area,cs:'P'})});S.tickets.forEach(t=>{if(t.agent)t.agent=mp[t.agent]||0;if(t.cag)t.cag=mp[t.cag]||0});S.agents=[]}
+const save=()=>{sv=1;try{localStorage.setItem(K,JSON.stringify(S))}catch(x){}};
+const $=s=>document.querySelector(s),nid=()=>S.n++,td=()=>new Date().toISOString().slice(0,10);
+const inr=n=>'₹'+Math.round(n).toLocaleString('en-IN');
+const e=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const G=i=>S.groups.find(g=>g.id==i),Mb=i=>S.members.find(m=>m.id==i),fmt=a=>a?[a.d,a.s,a.a,a.t].filter(Boolean).join(', ')+(a.n?' - '+a.n:''):'',corr=m=>{const A=m.addr;return A?fmt(m.cs=='P'?A.p:m.cs=='O'?A.o:A.r):(m.cs=='P'?m.perm:m.cs=='O'?m.off:m.curr)};
+let tab='dash',ov='g',ag=0,msg='',mv='r',ms=1,keep=null,sv=0,pre='';
+const snap=()=>{const k={};document.querySelectorAll('#main input,#main select').forEach(x=>{if(x.id)k[x.id]=x.value});return k};
+const flash=m=>{msg=m;if(!sv)keep=snap();sv=0;render();scrollTo(0,0)};
+const val=i=>$('#'+i).value;
+// ---------- engine ----------
+function cm(g){const d=new Date(),s=new Date(g.start);return Math.max(0,Math.min(g.months,(d.getFullYear()-s.getFullYear())*12+d.getMonth()-s.getMonth()+1))}
+const applies=(g,a)=>(a.mode||g.mode)==='NEXT'?a.month+1:(g.first&&a.month==1?2:a.month);
+const divFor=(t,m)=>S.auctions.filter(a=>a.gid==t.gid&&applies(G(t.gid),a)==m&&a.elig.includes(t.id)).reduce((s,a)=>s+a.per,0);
+const due=(t,m)=>{const g=G(t.gid);return g.inst+(m==1?g.fee:0)-divFor(t,m)};
+const tdue=t=>{let s=0;for(let m=1;m<=cm(G(t.gid));m++)s+=due(t,m);return s};
+const paid=t=>S.pays.filter(p=>p.tid==t.id).reduce((s,p)=>s+p.amt,0)+S.adjs.filter(a=>a.tid==t.id&&a.type!='GEN').reduce((s,a)=>s+a.sub,0);
+const advBal=t=>S.pays.filter(p=>p.tid==t.id).reduce((s,p)=>s+(p.adv||0),0)-S.adjs.filter(a=>a.tid==t.id&&a.type=='ADV').reduce((s,a)=>s+a.sub,0);
+const bidRem=t=>{const a=S.auctions.find(x=>x.tid==t.id);return a?a.bid-S.adjs.filter(x=>x.tid==t.id&&x.type=='BID').reduce((s,x)=>s+x.sub,0):0};
+const chgBal=(t,h)=>S.pays.filter(p=>p.tid==t.id).reduce((s,p)=>s+(p[h]||0),0)-S.adjs.filter(a=>a.tid==t.id&&a.type=='GEN'&&a.head==h).reduce((s,a)=>s+a.chg,0);
+const rcT=p=>p.amt+(p.adv||0)+(p.pen||0)+(p.bank||0)+(p.gst||0)+(p.oth||0);
+const out=t=>tdue(t)-paid(t);
+function behind(t){const p=paid(t);let c=0,n=0;for(let m=1;m<=cm(G(t.gid));m++){c+=due(t,m);if(c-p>0.5)n++}return n}
+function pos(t){if(t.st)return t.st;if(behind(t)>=3)return'Defaulter';const a=S.auctions.find(a=>a.tid==t.id);return a?(a.sec?'Prized, paying':'Prized, security pending'):'Non-prized'}
+const an=id=>{const a=Mb(id);return a?e((a.code+' '+a.name).trim()):''};
+const rvl={};const aadCell=m=>m.aad?(rvl[m.id]?m.aad.replace(/(\d{4})(?=\d)/g,'$1 '):'xxxx xxxx '+m.aad.slice(-4))+` <button class="sb" onclick="rvl[${m.id}]=!rvl[${m.id}];render()">${rvl[m.id]?'Hide':'Show'}</button>`:m.a4?'xxxx xxxx '+m.a4:'';
+const TY={B:'Agent',C:'Collection agent',X:'Agent and collection agent'};
+const roles=m=>[m.mem!==false?'Member':'',m.ag?TY[m.ag]:'',m.gu?'Guarantor':''].filter(Boolean).join(', ');
+const CH2={pen:'Penalty',bank:'Bank charges',gst:'GST',oth:'Other charges'};
+const AT={CAN:'Cancel adjustment',BID:'Bid payable adjustment',ADV:'Advance subscription adjustment',GEN:'General adjustment (collected charges)'};
+const tname=t=>`${e(G(t.gid).code)}/${t.no} ${e(Mb(t.mid).name)}`;
+const tbl=(h,r)=>`<div class="w"><table><tr>${h.map(x=>`<th${x[0]=='#'?' class="n"':''}>${x.replace(/^#/,'')}</th>`).join('')}</tr>${r.join('')||'<tr><td class="mut">Nothing here yet.</td></tr>'}</table></div>`;
+const tr=c=>`<tr>${c.map(x=>`<td${typeof x=='number'?' class="n"':''}>${typeof x=='number'?inr(x):x}</td>`).join('')}</tr>`;
+// ---------- views ----------
+const views={
+dash(){const ts=S.tickets,o=ts.reduce((s,t)=>s+Math.max(0,out(t)),0),col=S.pays.reduce((s,p)=>s+p.amt,0);
+const done=[S.groups.length,S.members.filter(m=>m.ag).length,S.members.length,ts.length,S.auctions.length,S.pays.length,0].map(x=>x>0);
+const T=[['grp','Create a chit group','Set the value, installment, commission, dividend rule and the fixed deposit.'],['agt','Add agents','Optional. People who enroll members or collect installments.'],['mem','Register members','Each person is registered once, using PAN or Aadhaar.'],['enr','Enroll members in the group','Choose the nominee, agent and collection agent for each ticket.'],['auc','Hold the monthly auction','Enter the winner and the prize. The dividend is worked out for you.'],['col','Collect installments','Record each receipt from a member.'],['out','Check outstanding','See what is due by group, member, position or collection agent.']];
+const N=[];
+S.groups.forEach(g=>{const n=S.auctions.filter(a=>a.gid==g.id).length;if(cm(g)>n&&n<g.months)N.push([`${e(g.code)}: the auction for month ${n+1} is pending`,'auc','wn',g.id])});
+S.groups.forEach(g=>g.fds.forEach(f=>{const d=Math.round((new Date(f.exp)-new Date())/864e5);if(d<60)N.push([`${e(g.code)}: fixed deposit ${e(f.no)} ${d<0?'expired '+(-d)+' days ago':'expires in '+d+' days'}`,'grp',d<0?'bad':'wn'])}));
+const df=ts.filter(t=>pos(t)=='Defaulter').length,sp=ts.filter(t=>pos(t)=='Prized, security pending').length,nn=ts.filter(t=>!t.nom).length;
+if(df)N.push([`${df} ticket(s) are defaulters`,'out','bad']);if(sp)N.push([`${sp} prized ticket(s) are waiting for security verification`,'out','wn']);if(nn)N.push([`${nn} ticket(s) have no nominee`,'mem','wn']);
+return `<section><div class="k"><div><b>${S.groups.length}</b><span>Groups</span></div><div><b>${ts.length}</b><span>Tickets</span></div><div><b>${inr(col)}</b><span>Collected</span></div><div><b class="${o?'bad':''}">${inr(o)}</b><span>Outstanding</span></div></div></section>
+<section><h2>Needs attention</h2>${N.length?N.map(([t,k,c,gid])=>`<div class="todo"><span class="${c}">${t}</span><button class="b s" onclick="${gid?'ag='+gid+';':''}go('${k}')">Open</button></div>`).join(''):'<p class="mut" style="margin:0">Nothing needs attention right now.</p>'}</section>
+<section><h2>How to use this software</h2><p class="hint">Follow these steps in order the first time.</p>${T.map(([k,t,d],i)=>`<div class="todo"><span><b>${i+1}. ${t}</b><br><span class="mut">${d}</span></span><span>${done[i]?'<span class="ok">Done</span>':''}<button class="b s" onclick="go('${k}')">Open</button></span></div>`).join('')}</section>
+<section><h2>Try it</h2><button class="b s" onclick="demo()">Load demo data</button><button class="b s" onclick="if(confirm('Delete all data in this browser?')){S={groups:[],members:[],tickets:[],auctions:[],pays:[],agents:[],adjs:[],n:1};save();render()}">Clear all data</button></section>`},
+grp(){return `<section><h2>Create group</h2><div class="g">
+<label>Group code<input id="gc"></label><label>Group name<input id="gn"></label>
+<label>Chit value<input id="gv" type="number" value="100000"></label><label>Tickets<input id="gt" type="number" value="20"></label>
+<label>Months<input id="gm" type="number" value="20"></label><label>Installment<input id="gi" type="number" value="5000"></label>
+<label>Start date<input id="gs" type="date" value="${td().slice(0,8)}01"></label><label>Commission %<input id="gp" type="number" value="5" step="0.1"></label>
+<label>Enrollment fee (this group)<input id="ge" type="number" value="0"></label>
+<label>Dividend mode<select id="gd"><option value="NEXT">Next month</option><option value="SAME">Same month</option></select></label>
+<label>First installment full<select id="gf"><option value="1">Yes</option><option value="0">No</option></select></label>
+<label>Prized members get dividend<select id="gz"><option value="1">Yes</option><option value="0">No</option></select></label></div>
+<h2 style="margin-top:14px">Fixed deposit</h2><div class="g">
+<label>FD number<input id="fn"></label><label>FD start date<input id="fs" type="date"></label><label>FD expiry date<input id="fe" type="date"></label>
+<label>Bank (optional)<input id="fb"></label><label>FD amount (optional)<input id="fa" type="number"></label></div>
+<button class="b" onclick="addGrp()">Create group</button></section>
+<section><h2>Groups</h2>${tbl(['Code','Name','#Value','Tickets','#Installment','#Enroll fee','Dividend','FD no','FD expiry'],S.groups.map(g=>tr([e(g.code),e(g.name),g.value,`${S.tickets.filter(t=>t.gid==g.id).length}/${g.tickets}`,g.inst,g.fee,g.mode=='NEXT'?'Next month':'Same month',e(g.fds.map(f=>f.no).join(', ')),g.fds.map(f=>f.exp).join(', ')])))}</section>`},
+mem(){const o=a=>a.map(x=>`<option value="${x.id}">${e(x.mobile?((x.code||'')+' '+x.name).trim():x.code||x.name)}</option>`).join('');
+const B=(k,l)=>`<button class="b ${mv==k?'':'s'}" onclick="mv='${k}';render()">${l}</button>`;const f=S.tickets[0]||{};let b='';
+if(mv=='r')b=regForm();
+if(mv=='o')b=`<section><h2>Change roles</h2><p class="hint">Convert a person: make a member an agent or guarantor, or an agent a member. The details stay the same, so nothing is typed again.</p>
+<div class="g2"><label>Person<select id="rp" onchange="fillRoles()">${S.members.map(m=>`<option value="${m.id}">${e(m.code+' '+m.name)}</option>`).join('')}</select></label><label>Member<select id="qM"><option value="1">Yes</option><option value="0">No</option></select></label><label>Agent role<select id="qA"><option value="">None</option><option value="B">Agent</option><option value="C">Collection agent</option><option value="X">Agent and collection agent</option></select></label><label>Guarantor<select id="qG"><option value="0">No</option><option value="1">Yes</option></select></label><label>Commission %<i>optional</i><input id="qC" type="number" step="0.01"></label><label>Area or route<i>optional</i><input id="qR"></label></div>
+<div class="nav"><button class="b" onclick="saveRoles()">Save roles</button></div></section>`;
+if(mv=='n')b=`<section><h2>Change a ticket's nominee</h2><p class="hint">Each ticket (group and ticket number) has its own nominee. Pick a ticket to view or change it.</p>
+<div class="g2"><label>Ticket<select id="nt" onchange="fillNom()">${S.tickets.map(t=>`<option value="${t.id}">${tname(t)}</option>`).join('')}</select></label>
+<label>Nominee name<i>required</i><input id="nn" value="${e(f.nom)}"></label><label>Relation<i>optional</i><input id="nr" value="${e(f.nrel)}"></label><label>Nominee mobile<i>optional</i><input id="nb" value="${e(f.nmob)}"></label></div>
+<div class="nav"><button class="b" onclick="saveNom()">Save nominee</button></div></section>
+<section><h2>Nominees by ticket</h2>${tbl(['Ticket','Nominee','Relation','Mobile','Changes'],S.tickets.map(t=>tr([tname(t),e(t.nom),e(t.nrel),e(t.nmob),''+(t.nh||[]).length])))}</section>`;
+if(mv=='l')b=`<section><h2>Registered members</h2><div class="mt">${tbl(['Code','Name','Roles','Mobile','PAN','Aadhaar','GST','Correspondence address','Tickets'],S.members.map(m=>tr([e(m.code),e(m.name),roles(m),e(m.mobile||m.phone),e(m.pan),aadCell(m),e(m.gst),e(corr(m)),S.tickets.filter(t=>t.mid==m.id).map(t=>e(G(t.gid).code)+'/'+t.no).join(', ')])))}</div></section>`;
+return `<section style="padding:6px 14px 14px">${B('r','Register')}${B('o','Roles')}${B('n','Nominees')}${B('l','Member list')}</section>`+b},
+enr(){const o=a=>a.map(x=>`<option value="${x.id}">${e(x.mobile?((x.code||'')+' '+x.name).trim():x.code||x.name)}</option>`).join(''),ao=f=>'<option value="0">None</option>'+S.members.filter(a=>a.ag&&f(a)).map(a=>`<option value="${a.id}">${e(a.code+' '+a.name)}</option>`).join('');
+return `<section><h2>Enroll a member in a group</h2><p class="hint">The first installment is the full installment plus the group's enrollment fee. The nominee and agents belong to these tickets only.</p>
+<h3>Enrollment details</h3><div class="g2"><label>Enrollment date<i>required</i><input id="ed" type="date" value="${td()}"></label><label>Member<select id="em">${o(S.members.filter(m=>m.mem!==false))}</select></label><label>Group<select id="eg">${o(S.groups)}</select></label><label>Number of tickets<input id="et" type="number" value="1" min="1"></label></div>
+<h3>Agent details</h3>${S.members.some(m=>m.ag)?'':'<p class="hint">No agents yet. Register one in the Agents screen, or leave these as None.</p>'}<div class="g2"><label>Agent<i>who enrolled the member</i><select id="ea">${ao(a=>a.ag!='C')}</select></label><label>Collection agent<i>who collects installments</i><select id="ec">${ao(a=>a.ag!='B')}</select></label><label>Collection area or route<i>optional</i><input id="er"></label></div>
+<h3>Enrollment fee</h3><div class="g2"><label>Fee received now<select id="ef"><option value="0">No</option><option value="1">Yes</option></select></label><label>Payment mode<select id="ep"><option>Cash</option><option>UPI</option><option>Cheque</option><option>Bank transfer</option></select></label></div><p class="hint" style="margin:8px 0 0">The fee is the amount set on the group. If received now, it is saved as a receipt for each ticket.</p>
+<h3>Nominee for these tickets</h3><div class="g2"><label>Nominee name<i>required</i><input id="nw"></label><label>Relation<i>optional</i><input id="nz"></label><label>Nominee mobile<i>optional</i><input id="nm" inputmode="numeric" maxlength="10"></label></div>
+<h3>Remarks</h3><div class="g2"><label>Remarks<i>optional</i><input id="ek"></label></div>
+<div class="nav"><button class="b" onclick="enroll()">Enroll</button></div></section>
+<section><h2>Recent enrollments</h2>${tbl(['Date','Ticket','Agent','Collection agent','Area'],S.tickets.slice(-15).reverse().map(t=>tr([t.date||'',tname(t),an(t.agent),an(t.cag),e(t.area)])))}</section>`},
+agt(){const A=S.members.filter(m=>m.ag);return `<section><p class="hint" style="margin-top:0">Agents are registered with the same details as members. A member can also be made an agent without typing anything again.</p><button class="b" onclick="newAgent()">Register new agent</button><button class="b s" style="margin-left:8px" onclick="mv='o';go('mem')">Make an existing member an agent</button></section>
+<section><h2>Agents</h2><div class="mt2">${tbl(['Code','Name','Type','Mobile','Address','Enrolled (tickets)','Collecting (tickets)','Commission','Area','Also a member'],A.map(m=>tr([e(m.code),e(m.name),TY[m.ag],e(m.mobile),e(corr(m)),''+S.tickets.filter(t=>t.agent==m.id).length,''+S.tickets.filter(t=>t.cag==m.id).length,(m.comm||0)+'%',e(m.area),m.mem!==false?'Yes':'No'])))}</div></section>`},
+rau(){const r=S.auctions.map(a=>{const g=G(a.gid);return tr([e(g.code),'M'+a.month,tname(S.tickets.find(t=>t.id==a.tid)),a.bid,a.disc,a.comm,a.pool,a.per,applies(g,a)>g.months?'At settlement':'M'+applies(g,a)])});return `<section>${tbl(['Group','Month','Winner','#Prize','#Discount','#Commission','#Dividend pool','#Per ticket','Applied in month'],r)}</section>`},
+rrc(){const p=S.pays.slice().sort((a,b)=>b.date>a.date?1:-1),T=k=>inr(p.reduce((s,x)=>s+(x[k]||0),0));
+return `<section><p class="hint">Subscription ${T('amt')}, advance ${T('adv')}, penalty ${T('pen')}, bank charges ${T('bank')}, GST ${T('gst')}, other ${T('oth')}. Total received <b>${inr(p.reduce((s,x)=>s+rcT(x),0))}</b></p><div class="w"><table><tr><th>Date</th><th>Ticket</th><th class="n">Subscription</th><th class="n">Advance</th><th class="n">Penalty</th><th class="n">Bank chg</th><th class="n">GST</th><th class="n">Other</th><th class="n">Total</th><th>Mode</th><th>Bank</th><th>Ref no</th><th>Ref date</th><th>Narration</th></tr>${p.map(x=>tr([x.date,tname(S.tickets.find(t=>t.id==x.tid)),x.amt,x.adv||0,x.pen||0,x.bank||0,x.gst||0,x.oth||0,rcT(x),e(x.mode||''),e(x.bnk||''),e(x.ref||''),x.rdt||'',e(x.narr||x.note||'')])).join('')||'<tr><td class="mut">Nothing here yet.</td></tr>'}</table></div></section>`},
+rfd(){const r=[];S.groups.forEach(g=>g.fds.forEach(f=>{const d=Math.round((new Date(f.exp)-new Date())/864e5);r.push(tr([e(g.code),e(f.no),f.start,f.exp,e(f.bank),f.amt||0,d<0?'<span class="bad">Expired</span>':d<60?`<span class="wn">Expires in ${d} days</span>`:'<span class="ok">Active</span>']))}));return `<section>${tbl(['Group','FD no','Start','Expiry','Bank','#Amount','Status'],r)}</section>`},
+bk(){return `<section><h2>Export data</h2><p class="hint">Copy this text and keep it safe. It contains all member details, including PAN and Aadhaar, so store it securely.</p><textarea readonly rows="6">${e(JSON.stringify(S))}</textarea></section>
+<section><h2>Restore data</h2><p class="hint">Paste an earlier export here. This replaces everything now in the app.</p><textarea id="bi" rows="6"></textarea><button class="b" onclick="restore()">Restore</button></section>`},
+dm(){return `<section><h2>Demo data</h2><p class="hint">Adds one sample group with five members, so you can try an auction and a collection.</p><button class="b" onclick="demo()">Load demo data</button></section>
+<section><h2>Reset</h2><p class="hint">Deletes all data in this browser. Export a backup first if you need it.</p><button class="b s" onclick="if(confirm('Delete all data in this browser?')){S={groups:[],members:[],tickets:[],auctions:[],pays:[],agents:[],adjs:[],n:1};save();render()}">Clear all data</button></section>`},
+a1(){const C=COA(),K=p=>C.filter(x=>x.par==p),ng=C.filter(x=>x.g).length;
+const nd=x=>x.g?`<details><summary><b>${e(x.name)}</b> <span class="mut">${K(x.id).length?'('+K(x.id).length+')':'(no accounts yet)'}</span></summary><div class="ind">${K(x.id).map(nd).join('')}</div></details>`:`<div class="lg">${e(x.name)}${x.op?` <span class="mut">${inr(x.op)} ${x.dc}</span>`:''}</div>`;
+const op=(p,d)=>K(p).filter(x=>x.g).map(x=>`<option value="${x.id}">${'— '.repeat(d)}${e(x.name)}</option>`+op(x.id,d+1)).join('');
+return `<section><h2>Add account</h2><div class="g2"><label>Type<select id="ak"><option value="L">Ledger</option><option value="G">Group</option></select></label><label>Name<i>required</i><input id="an"></label><label>Under group<select id="au"><option value="0">(Top level, groups only)</option>${op(0,0)}</select></label><label>Opening balance<i>ledgers only</i><input id="ao" type="number" min="0" step="0.01" value="0"></label><label>Dr or Cr<select id="ad"><option value="Dr">Dr</option><option value="Cr">Cr</option></select></label></div><div class="nav"><button class="b" onclick="addAcc()">Add account</button></div></section>
+<section><h2>Account tree</h2><p class="hint">${ng} groups and ${C.length-ng} ledgers, loaded from your existing software's account tree. Click a group to open it.</p><label style="max-width:320px;margin-bottom:12px">Search<input oninput="sa(this.value)" placeholder="Type part of an account name"></label><div id="tree">${K(0).map(nd).join('')}</div></section>`},
+auc(){const g=G(ag)||S.groups[0];if(!g)return'<section>Create a group first.</section>';ag=g.id;
+const au=S.auctions.filter(a=>a.gid==g.id),pr=au.map(a=>a.tid),c=S.tickets.filter(t=>t.gid==g.id&&!pr.includes(t.id));
+return `<section><h2>Auction</h2><div class="g"><label>Group<select onchange="ag=+this.value;render()">${S.groups.map(x=>`<option value="${x.id}"${x.id==g.id?' selected':''}>${e(x.code)}</option>`).join('')}</select></label>
+<label>Month<input value="${au.length+1} of ${g.months}" disabled></label>
+<label>Winning ticket<select id="at">${c.map(t=>`<option value="${t.id}">${tname(t)}</option>`).join('')}</select></label>
+<label>Prize amount (bid)<input id="ab" type="number" oninput="pv()"></label>
+<label>Security verified<select id="as"><option value="0">No</option><option value="1">Yes</option></select></label>
+<label>Dividend for this auction<select id="ad"><option value="NEXT"${g.mode=='NEXT'?' selected':''}>Next month</option><option value="SAME"${g.mode=='SAME'?' selected':''}>Same month</option></select></label></div>
+<div class="pv" id="pv">Enter the prize amount to see discount, commission and dividend.</div><button class="b" onclick="addAuc()">Save auction</button></section>
+<section><h2>Auction register</h2>${tbl(['Month','Winner','#Prize','#Discount','#Commission','#Dividend pool','#Per ticket','Applied in month'],au.map(a=>tr(['M'+a.month,tname(S.tickets.find(t=>t.id==a.tid)),a.bid,a.disc,a.comm,a.pool,a.per,applies(g,a)>g.months?'At settlement':'M'+applies(g,a)])))}</section>`},
+col(){const bl=[...new Set(S.members.map(m=>m.bank).concat(S.pays.map(p=>p.bnk)).filter(Boolean))],opts=S.tickets.map(t=>`<option value="${t.id}">${tname(t)} (due ${inr(Math.max(0,out(t)))})</option>`).join(''),F=(l,id,h)=>`<label>${l}<i>${h||''}</i><input id="${id}" type="number" min="0" step="0.01" value="0" oninput="tot()"></label>`;
+return `<section><h2>Receive money</h2><div class="g2"><label>Ticket<select id="ct" onchange="ci(1)">${opts}</select></label><label>Receipt date<input id="cd" type="date" value="${td()}"></label></div>
+<div id="ci" style="margin-top:12px"></div>
+<h3>Amounts</h3><div class="g2">${F('Subscription amount','ca','installment')}${F('Advance subscription','cv','for future months')}${F('Penalty','cp')}${F('Bank charges','cb')}${F('GST','cg')}${F('Other charges','co')}</div>
+<div id="ct2" style="margin-top:10px"></div>
+<h3>Collection details</h3><div class="g2"><label>Collection mode<select id="cmo" onchange="cmd()"><option>Cash</option><option>Cheque</option><option>RTGS</option><option>NEFT</option><option>UPI</option></select></label><label>Narration<i>optional</i><input id="cn"></label></div>
+<div id="cbx" hidden><h3 id="cbh">Transaction details</h3><div class="g2"><label><span id="cbl">Bank</span><i>required</i><input id="cbk" list="bnk"></label><label><span id="cnl">Transaction no</span><i>required</i><input id="cr"></label><label><span id="cdl">Transaction date</span><i>required</i><input id="cdt" type="date" value="${td()}"></label></div><datalist id="bnk">${bl.map(b=>`<option value="${e(b)}">`).join('')}</datalist></div>
+<div class="nav"><button class="b" onclick="addPay()">Save receipt</button></div></section>
+<section><h2>Recent receipts</h2>${tbl(['Date','Ticket','#Subscription','#Charges','#Total','Mode','Narration'],S.pays.slice(-8).reverse().map(p=>tr([p.date,tname(S.tickets.find(t=>t.id==p.tid)),p.amt,(p.pen||0)+(p.bank||0)+(p.gst||0)+(p.oth||0),rcT(p),e((p.mode||'')+(p.ref?' '+p.ref:'')+(p.bnk?' ('+p.bnk+')':'')),e(p.narr||p.note||'')])))}</section>`},
+adj(){return `<section><h2>New adjustment</h2><div class="g2"><label>Ticket<select id="jt" onchange="jctx()">${S.tickets.map(t=>`<option value="${t.id}">${tname(t)}</option>`).join('')}</select></label><label>Date<input id="jd" type="date" value="${td()}"></label>
+<label>Adjustment type<select id="jy" onchange="jctx()">${Object.keys(AT).map(k=>`<option value="${k}">${AT[k]}</option>`).join('')}</select></label></div>
+<div id="jx" class="pv"></div>
+<div class="g2" style="margin-top:12px"><label id="lS">Subscription amount to adjust<input id="js" type="number" min="0" step="0.01" value="0"></label><label id="lH">Charge head<select id="jh"><option value="pen">Penalty</option><option value="bank">Bank charges</option><option value="gst">GST</option><option value="oth">Other charges</option></select></label><label id="lG">Charges amount to adjust<input id="jg" type="number" min="0" step="0.01" value="0"></label><label id="lK">Close the ticket<i>cancel only</i><select id="jk"><option value="0">No</option><option value="1">Yes</option></select></label><label>Narration<i>optional</i><input id="jn"></label></div>
+<div class="nav"><button class="b" onclick="saveAdj()">Save adjustment</button></div></section>
+<section><h2>Adjustments</h2>${tbl(['Date','Ticket','Type','#Subscription','#Charges','Charge head','Narration'],S.adjs.slice().reverse().map(a=>tr([a.date,tname(S.tickets.find(t=>t.id==a.tid)),AT[a.type],a.sub,a.chg,e((CH2[a.head]||'')),e(a.narr)])))}</section>`},
+rad(){return `<section>${tbl(['Date','Ticket','Type','#Subscription','#Charges','Charge head','Narration'],S.adjs.slice().sort((a,b)=>b.date>a.date?1:-1).map(a=>tr([a.date,tname(S.tickets.find(t=>t.id==a.tid)),AT[a.type],a.sub,a.chg,e((CH2[a.head]||'')),e(a.narr)])))}</section>`},
+out(){const ts=S.tickets,row=(t,f)=>f(ts.filter(t));let b='';
+if(ov=='g')b=tbl(['Group','Month','Tickets','#Due till date','#Collected','#Outstanding'],S.groups.map(g=>{const x=ts.filter(t=>t.gid==g.id);return tr([e(g.code),`${cm(g)}/${g.months}`,''+x.length,x.reduce((s,t)=>s+tdue(t),0),x.reduce((s,t)=>s+paid(t),0),x.reduce((s,t)=>s+out(t),0)])}));
+if(ov=='m')b=tbl(['Member','Tickets','#Due till date','#Collected','#Outstanding'],S.members.map(m=>{const x=ts.filter(t=>t.mid==m.id);return tr([e(m.name),''+x.length,x.reduce((s,t)=>s+tdue(t),0),x.reduce((s,t)=>s+paid(t),0),x.reduce((s,t)=>s+out(t),0)])}));
+if(ov=='a')b=tbl(['Collection agent','Tickets','#Due till date','#Collected','#Outstanding'],S.members.filter(a=>a.ag&&a.ag!='B').concat([{id:0,code:'',name:'No collection agent'}]).map(a=>{const x=ts.filter(t=>(t.cag||0)==a.id);return tr([e((a.code+' '+a.name).trim()),''+x.length,x.reduce((s,t)=>s+tdue(t),0),x.reduce((s,t)=>s+paid(t),0),x.reduce((s,t)=>s+out(t),0)])}));
+if(ov=='p'){const P={};ts.forEach(t=>{const p=pos(t);(P[p]=P[p]||[]).push(t)});
+b=tbl(['Position','Tickets','#Outstanding'],Object.keys(P).map(p=>tr([p,''+P[p].length,P[p].reduce((s,t)=>s+Math.max(0,out(t)),0)])))+'<h2 style="margin-top:16px">Ticket-wise</h2>'+tbl(['Ticket','Position','Months behind','#Outstanding'],ts.map(t=>tr([tname(t),pos(t),''+behind(t),out(t)])))}
+const B=(k,l)=>`<button class="b ${ov==k?'':'s'}" onclick="ov='${k}';render()">${l}</button>`;
+return `<section><h2>Outstanding</h2>${B('g','Group-wise')}${B('m','Member-wise')}${B('p','Member position-wise')}${B('a','Collection agent-wise')}<div style="margin-top:12px">${b}</div></section>`}};
+// ---------- actions ----------
+function addGrp(){const g={id:nid(),code:val('gc').trim(),name:val('gn').trim(),value:+val('gv'),tickets:+val('gt'),months:+val('gm'),inst:+val('gi'),start:val('gs'),comm:+val('gp'),fee:+val('ge'),mode:val('gd'),first:val('gf')=='1',prized:val('gz')=='1',fds:[]};
+if(!g.code||!g.value||!g.tickets||!g.months||!g.inst||!g.start)return flash('Enter group code, value, tickets, months, installment and start date.');
+if(S.groups.some(x=>x.code==g.code))return flash('This group code already exists.');
+const f={no:val('fn').trim(),start:val('fs'),exp:val('fe'),bank:val('fb'),amt:+val('fa')||0};
+if(!f.no||!f.start||!f.exp)return flash('Enter the FD number, start date and expiry date.');
+if(f.exp<=f.start)return flash('FD expiry must be after the FD start date.');
+g.fds.push(f);const l=new Date(g.start);l.setMonth(l.getMonth()+g.months-1);
+S.groups.push(g);save();flash(f.exp<l.toISOString().slice(0,10)?'Group created. Warning: the FD expires before the last auction month.':'Group created.')}
+const rd=p=>({d:val(p+'d').trim(),s:val(p+'s').trim(),a:val(p+'a').trim(),t:val(p+'t').trim(),n:val(p+'n').trim()});
+const aok=(a,w)=>!a.d||!a.s||!a.t?`Enter door no, street and city for the ${w} address.`:!/^[1-9]\d{5}$/.test(a.n)?`Enter a valid 6-digit pin code for the ${w} address.`:'';
+const ver=a=>{const d=[[0,1,2,3,4,5,6,7,8,9],[1,2,3,4,0,6,7,8,9,5],[2,3,4,0,1,7,8,9,5,6],[3,4,0,1,2,8,9,5,6,7],[4,0,1,2,3,9,5,6,7,8],[5,9,8,7,6,0,4,3,2,1],[6,5,9,8,7,1,0,4,3,2],[7,6,5,9,8,2,1,0,4,3],[8,7,6,5,9,3,2,1,0,4],[9,8,7,6,5,4,3,2,1,0]],q=[[0,1,2,3,4,5,6,7,8,9],[1,5,7,6,2,8,3,0,9,4],[5,8,0,3,7,9,6,1,4,2],[8,9,1,6,0,4,3,5,2,7],[9,4,5,3,1,2,6,8,7,0],[4,2,8,6,5,7,3,9,0,1],[2,7,9,3,8,0,6,4,1,5],[7,0,4,6,9,1,3,2,5,8]];let c=0;a.split('').reverse().forEach((x,i)=>c=d[c][q[i%8][+x]]);return c==0};
+async function hsh(x){try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('chit-salt:'+x));return[...new Uint8Array(b)].map(c=>c.toString(16).padStart(2,'0')).join('')}catch(z){let h=5381;for(const c of 'chit-salt:'+x)h=(h*33^c.charCodeAt(0))>>>0;return'x'+h}}
+function st(n){ms=n;if(n==5)rev();document.querySelectorAll('.stp').forEach(x=>x.hidden=x.dataset.s!=n);document.querySelectorAll('.sb').forEach(x=>x.classList.toggle('on',x.dataset.s==n));scrollTo(0,0)}
+function fa(x){x.value=x.value.replace(/\D/g,'').slice(0,12).replace(/(\d{4})(?=\d)/g,'$1 ');chk()}
+function chk(){const p=val('mx').trim().toUpperCase(),a=val('mq').replace(/\s/g,''),L=[];
+if(p)L.push(/^[A-Z]{5}\d{4}[A-Z]$/.test(p)?['ok','PAN format is correct.']:['wn','PAN should look like ABCDE1234F.']);
+if(a)L.push(a.length<12?['wn',`Aadhaar: ${a.length} of 12 digits entered.`]:/^[2-9]\d{11}$/.test(a)&&ver(a)?['ok','Aadhaar number is valid.']:['bad','Aadhaar number is not valid. Check the digits.']);
+const x=S.members.find(m=>(p&&m.pan==p)||(a.length==12&&m.aad==a));if(x)L.push(['bad',`Already registered as ${x.code} ${x.name}. Use that person and change their roles if needed.`]);
+$('#idc').innerHTML=L.map(([c,t])=>`<div class="${c}">${e(t)}</div>`).join('')}
+function rev(){const g=i=>val(i).trim(),ad=p=>fmt({d:g(p+'d'),s:g(p+'s'),a:g(p+'a'),t:g(p+'t'),n:g(p+'n')}),cs=val('mc'),a=g('mq').replace(/\s/g,'');
+const R=[['Name',g('mn')],['Roles',[val('yM')=='1'?'Member':'',TY[val('yA')]||'',val('yG')=='1'?'Guarantor':''].filter(Boolean).join(', ')],['Mobile',g('mm')],['PAN',g('mx').toUpperCase()],['Aadhaar',a?'xxxx xxxx '+a.slice(-4):''],['Permanent address',ad('p')],['Office address',ad('o')],['Correspondence address',cs=='P'?'Same as permanent address':cs=='O'?'Same as office address':ad('r')],['Bank',g('ma')?g('mk')+' account ending '+g('ma').slice(-4):''],['GST',g('mg').toUpperCase()]];
+$('#rv').innerHTML='<table>'+R.map(([k,v])=>`<tr><th>${k}</th><td style="white-space:normal">${e(v)||'<span class="mut">Not entered</span>'}</td></tr>`).join('')+'</table>'}
+function regForm(){const pa=pre,L=(l,id,h,x)=>`<label>${l}<i>${h}</i><input id="${id}"${x||''}></label>`,mob=' inputmode="numeric" maxlength="10"';
+const A=(p,opt)=>[['d','Door no','required'],['s','Street','required'],['a','Area','optional'],['t','City','required'],['n','Pin code','6 digits']].map(([k,l,h])=>L(l,p+k,opt?'optional':h,k=='n'?' inputmode="numeric" maxlength="6"':'')).join('');
+const P=(n,t)=>`<div class="stp" data-s="${n}"${ms==n?'':' hidden'}>${t}<div class="nav">${n>1?`<button class="b s" onclick="st(${n-1})">Back</button>`:''}${n<5?`<button class="b" onclick="st(${n+1})">Next</button>`:`<button class="b" onclick="addMem()">Save member</button>`}</div></div>`;
+return `<section><h2>Register a person</h2><div class="steps">${['Basic details','ID proof','Addresses','Bank and tax','Review'].map((l,i)=>`<button class="sb${ms==i+1?' on':''}" data-s="${i+1}" onclick="st(${i+1})">${i+1}. ${l}</button>`).join('')}</div>
+${P(1,`<p class="hint">Who the member is and how to reach them.</p><div class="g2">${L('Member name','mn','required')}${L('Father or spouse name','mr','optional')}<label>Date of birth<i>optional</i><input id="md" type="date"></label>${L('Mobile number','mm','10 digits, required',mob)}${L('Alternate mobile','ml','optional',mob)}<label>Email<i>optional</i><input id="me" type="email"></label></div>
+<h3>Roles</h3><p class="hint">A person can be a member, an agent and a guarantor at the same time. You can change the roles later in Members &gt; Roles.</p><div class="g2"><label>Member<i>can join chit groups</i><select id="yM"><option value="1"${pa?'':' selected'}>Yes</option><option value="0"${pa?' selected':''}>No</option></select></label><label>Agent role<select id="yA"><option value="">None</option><option value="B"${pa=='B'?' selected':''}>Agent</option><option value="C">Collection agent</option><option value="X">Agent and collection agent</option></select></label><label>Guarantor<select id="yG"><option value="0">No</option><option value="1">Yes</option></select></label><label>Agent commission %<i>optional</i><input id="yC" type="number" step="0.01"></label><label>Collection area or route<i>optional</i><input id="yR"></label></div>`)}
+${P(2,`<p class="hint">Enter the PAN or the Aadhaar number, or both. At least one is needed so that each member is registered only once. The full 12-digit Aadhaar number is saved; lists show it masked, and Show reveals it.</p><div class="g2">${L('PAN','mx','example ABCDE1234F',' maxlength="10" oninput="this.value=this.value.toUpperCase();chk()"')}${L('Aadhaar number','mq','12 digits',' inputmode="numeric" maxlength="14" oninput="fa(this)"')}</div><div id="idc" class="pv"></div>`)}
+${P(3,`<h3>Permanent address</h3><div class="g2">${A('p')}</div><h3>Office address (optional, fill all required parts or leave blank)</h3><div class="g2">${A('o',1)}</div>
+<h3>Correspondence (current) address</h3><div class="g2"><label>Send letters to<select id="mc" onchange="$('#rbox').hidden=this.value!='D'"><option value="P">Same as permanent address</option><option value="O">Same as office address</option><option value="D">A different address</option></select></label></div><div id="rbox" hidden style="margin-top:14px"><div class="g2">${A('r')}</div></div>`)}
+${P(4,`<div class="g2">${L('GST number','mg','optional, 15 characters',' maxlength="15"')}${L('Bank name','mk','optional')}${L('Bank account number','ma','optional, 9 to 18 digits',' inputmode="numeric"')}${L('IFSC','mi','optional, 11 characters',' maxlength="11"')}</div>`)}
+${P(5,`<p class="hint">Check the details, then save. Use Back to change anything.</p><div id="rv" class="w"></div><h3>Before saving</h3><div class="g2"><label>Add even if a similar member exists<i>use only after a duplicate warning</i><select id="mf"><option value="0">No</option><option value="1">Yes</option></select></label></div>`)}</section>`}
+async function addMem(){const f=(n,m)=>{ms=n;flash(m)},v=i=>val(i).trim(),n=v('mn'),mob=v('mm'),alt=v('ml'),em=v('me'),pan=v('mx').toUpperCase(),gst=v('mg').toUpperCase(),ifsc=v('mi').toUpperCase(),acc=v('ma'),aad=v('mq').replace(/\s/g,''),cs=val('mc');
+if(!n)return f(1,'Enter the name.');
+const rM=val('yM')=='1',rA=val('yA'),rG=val('yG')=='1';if(!rM&&!rA&&!rG)return f(1,'Choose at least one role: member, agent or guarantor.');
+if(!/^[6-9]\d{9}$/.test(mob))return f(1,'Enter a valid 10-digit mobile number.');
+if(alt&&!/^[6-9]\d{9}$/.test(alt))return f(1,'Alternate mobile should be 10 digits, or leave it empty.');
+if(em&&!/^\S+@\S+\.\S+$/.test(em))return f(1,'Enter a valid email address, or leave it empty.');
+if(!pan&&!aad)return f(2,'Enter the PAN or the Aadhaar number. One of them is needed so that each member is registered only once.');
+if(pan&&!/^[A-Z]{5}\d{4}[A-Z]$/.test(pan))return f(2,'PAN should look like ABCDE1234F.');
+if(aad&&(!/^[2-9]\d{11}$/.test(aad)||!ver(aad)))return f(2,'Aadhaar number is not valid. Check the 12 digits.');
+const A={p:rd('p'),o:rd('o'),r:rd('r')};let er=aok(A.p,'permanent');if(er)return f(3,er);
+if(cs=='O'||Object.values(A.o).some(Boolean)){er=aok(A.o,'office');if(er)return f(3,er)}
+if(cs=='D'){er=aok(A.r,'correspondence');if(er)return f(3,er)}
+if(gst&&!/^\d{2}[A-Z]{5}\d{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/.test(gst))return f(4,'GST number should be 15 characters, for example 37ABCDE1234F1Z5.');
+if(acc&&!/^\d{9,18}$/.test(acc))return f(4,'Bank account number should be 9 to 18 digits.');
+if(ifsc&&!/^[A-Z]{4}0[A-Z0-9]{6}$/.test(ifsc))return f(4,'IFSC should look like SBIN0001234.');
+const ah=aad?await hsh(aad):'';
+const x=S.members.find(m=>(pan&&m.pan==pan)||(ah&&m.ah==ah)||(aad&&m.aad==aad));
+if(x)return f(2,`This person is already registered as ${e(x.code)} ${e(x.name)} (same ${pan&&x.pan==pan?'PAN':'Aadhaar'}). Use that person and change their roles if needed.`);
+const sim=S.members.filter(m=>m.mobile==mob||(acc&&m.acc==acc&&m.ifsc==ifsc)||(m.dob&&m.dob==val('md')&&m.name.toLowerCase()==n.toLowerCase()));
+if(sim.length&&val('mf')!='1')return f(5,'Possible duplicate: '+sim.map(m=>e(m.code)+' '+e(m.name)).join(', ')+' has the same mobile, bank account, or name and date of birth. If this is a different person, set "Add even if a similar member exists" to Yes and save again.');
+const code=(rM?'M':rA?'A':'G')+String(S.members.length+1).padStart(4,'0');
+S.members.push({id:nid(),code,name:n,rel:v('mr'),dob:val('md'),mobile:mob,alt,email:em,pan,gst,ah,aad,a4:aad.slice(-4),bank:v('mk'),acc,ifsc,addr:A,cs,mem:rM,ag:rA,gu:rG,comm:+val('yC')||0,area:val('yR').trim()});save();ms=1;pre='';flash(code+' registered.')}
+function fillNom(){const t=S.tickets.find(x=>x.id==val('nt'))||{};$('#nn').value=t.nom||'';$('#nr').value=t.nrel||'';$('#nb').value=t.nmob||''}
+function saveNom(){const t=S.tickets.find(x=>x.id==val('nt')),n=val('nn').trim(),b=val('nb').trim();
+if(!t)return flash('Enroll a member first.');if(!n)return flash('Enter the nominee name.');
+if(b&&!/^[6-9]\d{9}$/.test(b))return flash('Enter a valid 10-digit nominee mobile number.');
+if(t.nom)(t.nh=t.nh||[]).push({date:td(),nom:t.nom,nrel:t.nrel,nmob:t.nmob});
+t.nom=n;t.nrel=val('nr').trim();t.nmob=b;save();flash('Nominee saved for '+tname(t)+'.')}
+function enroll(){const g=G(val('eg')),m=Mb(val('em')),k=+val('et');if(!g||!m)return flash('Add a group and a member first.');
+const nn=val('nw').trim(),nb=val('nm').trim(),d=val('ed');
+if(!d)return flash('Enter the enrollment date.');if(!(k>=1))return flash('Enter the number of tickets.');
+if(!nn)return flash('Enter the nominee for these tickets.');if(nb&&!/^[6-9]\d{9}$/.test(nb))return flash('Enter a valid 10-digit nominee mobile number.');
+let n=S.tickets.filter(t=>t.gid==g.id).length;if(n+k>g.tickets)return flash(`Only ${g.tickets-n} tickets are left in this group.`);
+const A1=+val('ea')||0,A2=+val('ec')||0;
+for(let i=0;i<k;i++){const t={id:nid(),gid:g.id,mid:m.id,no:++n,nom:nn,nrel:val('nz').trim(),nmob:nb,date:d,agent:A1,cag:A2,area:val('er').trim(),rem:val('ek').trim()};S.tickets.push(t);if(val('ef')=='1'&&g.fee>0)S.pays.push({id:nid(),tid:t.id,amt:g.fee,date:d,mode:val('ep'),note:'Enrollment fee'})}
+save();flash(`Enrolled ${k} ticket(s) in ${e(g.code)}.`)}
+function newAgent(){pre='B';mv='r';ms=1;go('mem')}
+function fillRoles(){const m=Mb(val('rp'));if(!m)return;$('#qM').value=m.mem!==false?'1':'0';$('#qA').value=m.ag||'';$('#qG').value=m.gu?'1':'0';$('#qC').value=m.comm||'';$('#qR').value=m.area||''}
+function saveRoles(){const m=Mb(val('rp'));if(!m)return flash('Register a person first.');const M=val('qM')=='1',A=val('qA'),G2=val('qG')=='1';
+if(!M&&!A&&!G2)return flash('Choose at least one role.');
+if(!M&&S.tickets.some(t=>t.mid==m.id))return flash('This person has tickets, so the member role cannot be removed.');
+if(((A!='B'&&A!='X')&&S.tickets.some(t=>t.agent==m.id))||((A!='C'&&A!='X')&&S.tickets.some(t=>t.cag==m.id)))return flash('This person is the agent or collection agent on some tickets, so that role cannot be removed.');
+m.mem=M;m.ag=A;m.gu=G2;m.comm=+val('qC')||0;m.area=val('qR').trim();save();flash(e(m.code)+' roles saved: '+roles(m)+'.')}
+function ci(fill){const t=S.tickets.find(x=>x.id==val('ct'));if(!t){$('#ci').innerHTML='<span class="mut">Enroll a member first.</span>';return}
+const m=Mb(t.mid),g=G(t.gid),o=out(t),c=cm(g);
+$('#ci').innerHTML=`<div class="g2" style="font-size:13.5px"><div><span class="mut">Member</span><br>${e(m.code)} ${e(m.name)}<br>${e(m.mobile||'')}</div><div><span class="mut">Address</span><br>${e(corr(m))||'Not entered'}</div><div><span class="mut">Agent</span><br>${an(t.agent)||'None'}<br><span class="mut">Collection agent</span><br>${an(t.cag)||'None'}</div><div><span class="mut">Installments pending</span><br><b class="${o>0.5?'bad':'ok'}">${behind(t)} installment(s), ${inr(Math.max(0,o))}</b><br><span class="mut">This month: ${c?inr(due(t,c)):'group not started'}. Advance held: ${inr(advBal(t))}</span></div></div>`;
+if(fill){$('#ca').value=Math.max(0,Math.round(o));if($('#cbk'))$('#cbk').value=m.bank||''}tot()}
+function cmd(){const m=val('cmo'),T={Cheque:['Cheque details','Bank the cheque is drawn on','Cheque no','Cheque date'],RTGS:['RTGS details','Bank the money was sent from','UTR or reference no','Transaction date'],NEFT:['NEFT details','Bank the money was sent from','UTR or reference no','Transaction date'],UPI:['UPI details','Bank or UPI app','UPI reference no','Transaction date']}[m];$('#cbx').hidden=m=='Cash';if(T){$('#cbh').textContent=T[0];$('#cbl').textContent=T[1];$('#cnl').textContent=T[2];$('#cdl').textContent=T[3]}}
+function tot(){const v=i=>+val(i)||0,a=v('ca'),b=v('cv'),p=v('cp'),k=v('cb'),g=v('cg'),o=v('co');$('#ct2').innerHTML=`Subscription ${inr(a)} + Advance ${inr(b)} + Penalty ${inr(p)} + Bank charges ${inr(k)} + GST ${inr(g)} + Other ${inr(o)} = <b>${inr(a+b+p+k+g+o)}</b>`}
+function jctx(){const t=S.tickets.find(x=>x.id==val('jt')),y=val('jy');if(!t){$('#jx').innerHTML='Enroll a member first.';return}
+const o=Math.max(0,out(t)),H=CH2;
+const M={CAN:`Outstanding ${inr(o)}. The amount is credited to the ticket's subscription. You can also close the ticket.`,BID:S.auctions.some(a=>a.tid==t.id)?`Bid payable left ${inr(bidRem(t))}. Outstanding ${inr(o)}. The bid payable is used to clear the ticket's dues.`:'This ticket has not won an auction, so there is no bid payable.',ADV:`Advance held ${inr(advBal(t))}. Outstanding ${inr(o)}. The advance is moved to the installments due.`,GEN:'Collected charges available: '+Object.keys(H).map(k=>H[k]+' '+inr(chgBal(t,k))).join(', ')+'.'};
+$('#jx').innerHTML=M[y];$('#lS').hidden=y=='GEN';$('#lH').hidden=$('#lG').hidden=y!='GEN';$('#lK').hidden=y!='CAN'}
+function saveAdj(){const t=S.tickets.find(x=>x.id==val('jt')),y=val('jy'),a=+val('js')||0,c=+val('jg')||0,h=val('jh');if(!t)return flash('Select a ticket.');if(!val('jd'))return flash('Enter the date.');
+if(y=='GEN'){if(c<=0)return flash('Enter the charges amount to adjust.');if(c>chgBal(t,h)+0.001)return flash('Only '+inr(chgBal(t,h))+' of this charge has been collected and is available to adjust.')}
+else{if(a<=0)return flash('Enter the subscription amount to adjust.');const o=Math.max(0,out(t));
+if(y=='BID'){if(!S.auctions.some(x=>x.tid==t.id))return flash('This ticket has not won an auction, so there is no bid payable.');if(a>bidRem(t)+0.001)return flash('Only '+inr(bidRem(t))+' of the bid payable is left.')}
+if(y=='ADV'&&a>advBal(t)+0.001)return flash('Only '+inr(advBal(t))+' of advance is available.');
+if(y!='CAN'&&a>o+0.001)return flash('The ticket outstanding is only '+inr(o)+'.')}
+S.adjs.push({id:nid(),tid:t.id,date:val('jd'),type:y,sub:y=='GEN'?0:a,chg:y=='GEN'?c:0,head:y=='GEN'?h:'',narr:val('jn').trim()});
+if(y=='CAN'&&val('jk')=='1')t.st='Closed';save();flash('Adjustment saved.')}
+function pv(){const g=G(ag),b=+val('ab');if(!b)return;const d=g.value-b,c=g.value*g.comm/100;$('#pv').innerHTML=`Discount ${inr(d)}, commission ${inr(c)}, dividend pool <b>${inr(d-c)}</b>`+(d-c<0?' <span class="bad">(bid too high)</span>':'')}
+function addAuc(){const g=G(ag),au=S.auctions.filter(a=>a.gid==g.id),tid=+val('at'),bid=+val('ab'),m=au.length+1;
+if(m>g.months)return flash('All auctions of this group are done.');
+if(!tid||!bid||bid>g.value)return flash('Select the winning ticket and enter a prize amount up to the chit value.');
+const disc=g.value-bid,comm=g.value*g.comm/100,pool=disc-comm;if(pool<0)return flash('The discount does not cover the commission. Lower the prize amount.');
+const pr=au.map(a=>a.tid),tk=S.tickets.filter(t=>t.gid==g.id),el=(g.prized?tk:tk.filter(t=>!pr.includes(t.id)&&t.id!=tid)).map(t=>t.id);
+S.auctions.push({id:nid(),gid:g.id,month:m,tid,bid,disc,comm,pool,per:el.length?pool/el.length:0,elig:el,sec:val('as')=='1',mode:val('ad'),date:td()});save();flash('Auction saved. Dividend per ticket is '+inr(el.length?pool/el.length:0)+'.')}
+function addPay(){const t=S.tickets.find(x=>x.id==val('ct')),v=i=>+val(i)||0,a=v('ca'),vv=v('cv'),p=v('cp'),k=v('cb'),g=v('cg'),o=v('co');
+if(!t)return flash('Select a ticket.');if([a,vv,p,k,g,o].some(x=>x<0))return flash('Amounts cannot be negative.');
+if(a+vv+p+k+g+o<=0)return flash('Enter at least one amount.');if(!val('cd'))return flash('Enter the receipt date.');
+const md=val('cmo'),bk=val('cbk').trim(),rf=val('cr').trim(),dt=val('cdt'),cash=md=='Cash';
+if(!cash){if(!bk)return flash('Enter the bank.');if(!rf)return flash('Enter the '+(md=='Cheque'?'cheque':'transaction')+' number.');
+if(md=='Cheque'&&!/^\d{6}$/.test(rf))return flash('Cheque number should be 6 digits.');
+if(md!='Cheque'&&!/^[A-Za-z0-9]{6,35}$/.test(rf))return flash('Enter a valid reference number: 6 to 35 letters or digits, no spaces.');
+if(!dt)return flash('Enter the '+(md=='Cheque'?'cheque':'transaction')+' date.');
+if(md!='Cheque'&&dt>td())return flash('The transaction date cannot be in the future.');
+if(S.pays.some(x=>x.mode==md&&x.ref&&x.ref.toLowerCase()==rf.toLowerCase()&&(md!='Cheque'||(x.bnk||'').toLowerCase()==bk.toLowerCase())))return flash('This '+(md=='Cheque'?'cheque':'transaction')+' number is already recorded on another receipt.')}
+S.pays.push({id:nid(),tid:t.id,date:val('cd'),amt:a,adv:vv,pen:p,bank:k,gst:g,oth:o,mode:md,ref:cash?'':rf,bnk:cash?'':bk,rdt:cash?'':dt,narr:val('cn').trim()});save();flash('Receipt saved. Total '+inr(a+vv+p+k+g+o)+'.')}
+function demo(){const d=new Date();d.setMonth(d.getMonth()-2);const g={id:nid(),code:'G1',name:'Demo 1 lakh',value:100000,tickets:5,months:5,inst:20000,start:d.toISOString().slice(0,8)+'01',comm:5,fee:500,mode:'NEXT',first:true,prized:true,fds:[{no:'FD-1001',start:td(),exp:new Date(Date.now()+30*864e5).toISOString().slice(0,10),bank:'Demo Bank',amt:100000}]};
+S.groups.push(g);['Ravi','Lakshmi','Suresh','Anitha','Kiran'].forEach((n,i)=>{const m={id:nid(),name:n,phone:''};S.members.push(m);S.tickets.push({id:nid(),gid:g.id,mid:m.id,no:i+1})});save();flash('Demo group loaded. Try an auction next.')}
+function seedCoa(){const T=`+Capital Account
++Current Assets
+.+Bank Accounts
+.+Cash-in-hand
+.+Deposits (Asset)
+.+Loans & Advances (Asset)
+.Stock-in-hand
+.+Sundry Debtors
+..O/S - CLOSED GROUPS
+..TCL OUTSTANDING
+..O/S RUNNING GROUPS - SUIT FILE
+..O/S - CLOSED GROUPS - SUIT FILED
+..O/S-RUNNING GROUPS-SUIT FILE A/C
+..OUTSTANDING SUBSCRIPTION/CHIT COLLECTION
+.+SUNDRY ADVANCES
+.+DEPOSITS RECOVERABLE
+.PREPAID EXPENSES
+.DIRECT TAXES PAID IN ADVANCE
+.Stamps on Hand
+.GST RECIEVABLE
+.RE.AUCTIONDIFF
+.BIDS A/C
+.ARREAS FROM SUBSCRIBERSA/C CLOSED(TERMINATED CHIT)
+.SGST RECIEVABLE
+.COMPANY INVESTMENT ON VACANT CHITS
+.AGENT ADVANCE
+.BID ADVANCE
+.ADVANCE PAYMENTS
+.SALARY ADVANCE
+.INTEREST ON FD TDS
+.TDS RECIEAVABLE
+.COMPANY INVESTMENT ON OWN CHITS
+.IGST RECIEVABLE
+.FIXED DEPOSIT RECEIPTS CHIT
+.CHIT SECURITY DEPOSIT
+.ADVANCE TO EMPLOYEES
+.CGST RECIEVABLE
+.loanAccount
++Current Liabilities
+.+Duties & Taxes
+..Input Tax
+..Output Tax
+..INCOME TAX
+.+Provisions
+..ESI - PAYABLE
+.+Sundry Creditors
+..TDS ON COMMISSION
+..OUTSTANDING EXPENSES
+..T.D.S. ON CONTRACT
+..LABOUR WELFARE FUND (STAFF)
+..RENT ADVANCE
+..TDS
+..SUNDRY CREDITORS TDS REFUNDABLE
+.+DUE TO DIRECTOR
+.+ADVANCES FROM SUBSCRIBERS
+.FUTURE INSTALMENTS
+.+DIVIDEND PAYABLE TO SUBSCRIBERS
+.+SUBSCRIPTIONS REFUNDABLE TO SUBSCRIBERS
+.+SUNDRY CREDITORS FOR EXP.
+.+BRANCH BALANCES
+.+AGENCY COMMISSION PAYABLE
+.kireetisalary
+.orphons
+.service
+.expense
+.OPENING BALANCE DIFF A/C
+.CHIT SUBSCRIPTION
+.FOREMAN CHIT
+.BID PAYABLE
+.AGENT T.D.S. PAYABLE
+.BAD DEBTORS AND CREDITORS
+.RENT PAYABLE
+.SALARIES PAYABLE
+.CREDIT BALANCES WRITTEN BACK
+.NET SURPLUS/(LOSS)
+.ADVANCED SUBSCRIPTION COLLECTION
+.EMPLOYERR CONTRIBUTION PF PAYABLE
+.EMPLOYEE ESI CONTRIBUTION
+.DAILY COLLECTION
+.FUTURE SUBSCRIPTION AMOUNT
+.SERVICE TAX
+.SUSPENSE A/C
+.SERVICE TAX PAYABLE
+.EMPLOYEE CON PF
+.GST PAYABLE
+.SGST PAYABLE
+.CGST PAYABLE
+.IGST PAYABLE
+.PROFESSIONAL TAX
+.BID LOSS
+.LEGAL CELL OLD SOFTWARE AC
+.EMPLOYER CONTRIBUTION PF PAYABLE
+.EMPLOYEE CONTRIBUTION ESI
++Direct Expenses
+.MISCELLANEOUS EXPENCES
+.+SUIT FILE CHARGES
+..COURT FEE DOC.
+..ADVOCATE FEE
+..NPL
+..UCPL
+..MRCL
+..PRL
+..PRLG
+..LEGAL
+..OTHERS(SF)
+.+OFFICE MAINTENENCE
+.GUARANTEE BONDS
+.ESTABLISHMENT EXPENSES
+.+CHIT EXPENSES
+..CHIT REGISTRATION EXPENSES
+..ADVERTISEMENT EXPENSES
+..SUIT FILING FEES
+..CHQ.RETURN
+..COMMISSION EXPENSES
+.monthly rotation
+.+SALARIES
+.+Expenses
+.STAFF WELFARE EXPENSES
+.SPECIAL INCENTIVE ACCOUNT
+.AGENT COMMISSION
+.STAFF SALARY EXPENSES
+.TONER REFILLING EXPENSE
+.POSTAGE AND COURIER EXPENSES
+.BONUS
+.VEHICLE MAINTENANCE
+.SPECIAL INCENTIVE
+.INTERNET CHARGES
+.BULIDING MAINTENANCE EXPENSES
+.REVIEW EXPENSE
+.BUSINESS PROMOTION
+.TELEPHONE AND INTERNET EXPENSES
+.EMPLOYER PROFESSIONAL TAX
++Direct Income
+.+CHIT INCOME
+.+GST INCOME
+.+NON GST INCOME
+.NON GST INCOME
+.MISC - INCOME
+.INTEREST ON FD INCOME
+.LEGAL OPINION
++Fixed Assets
+.LAND
+.+BUILDINGS
+.+ELECTRICAL FITTINGS
+.OFFICE APPLIANCES
+.AIR CONDITIONERS
+.VEHICLES
+.COMPUTER
+.OFFICE EQUIPMENT
+.PRINTERS
+.BATTERS
++Indirect Expenses
+.INTEREST PAYMENTS
+.DIRECTORS REMUNERATION
+.PROFESSIONAL TAX
+.+ADMINISTRATIVE EXPENSES
+.OTHER EXPENSES
+.+REPAIRS & MAINTENANCE
+.STAFF COMMISSION
+.REGISTER OFFICE EXPENSES
+.BANK CHARGES
+.MISC.EXPENCES
+.RENT EXPENSES
+.ELECTRICITY EXPENSES
+.TRAVELLING EXPENSES
+.COURT FEE
+.BAD DEBTS A/C
+.EMPLOYER PF EXPENSES
+.EMPLOYER ESI CONTRIBUTION
+.EMPLOYER CONTRIBUTION ESI PAYABLE
+.POOJA EXPENSES
+.BUSINESS INCENTIVES
+.OFFICE MAINTENANCE EXPENSES
+.EMPLOYER ESI EXPENSES
++Indirect Income
+.+STAMPS & MISCELLANEOUS RECEIPTS
+.OTHER INCOME
+.+INTEREST AND DIVIDEND INCOME
+.OTHERS
+.PROFIT ON SALE OF ASSET
+.POSTAGE DUE
++Investments
++Loans (Liability)
+.Bank OD A/c (Bank OCC A/c)
+.Secured Loans
+.Unsecured Loans
++Misc. Expenses (Asset)
++Outstandings
++Purchase Accounts
++Sale Accounts
++Suspense A/c
+DS-MAYILADUTHURAI
+ESI -PAYABLE`,o=[],st=[];
+T.split('\n').forEach(l=>{if(!l)return;const d=l.match(/^\.*/)[0].length;let n=l.slice(d);const g=n[0]=='+';if(g)n=n.slice(1);const id=S.n++;o.push({id,name:n,par:d?st[d-1]:0,g,op:0,dc:'Dr'});st[d]=id});return o}
+const COA=()=>S.coa||(S.coa=seedCoa());
+function addAcc(){const C=COA(),g=val('ak')=='G',n=val('an').trim(),par=+val('au')||0,op=+val('ao')||0;
+if(!n)return flash('Enter the account name.');
+if(C.some(x=>x.name.toLowerCase()==n.toLowerCase()))return flash('An account or group with this name already exists.');
+if(!g&&!par)return flash('A ledger must be placed under a group.');
+if(op<0)return flash('Opening balance cannot be negative. Choose Dr or Cr instead.');
+C.push({id:nid(),name:n,par,g,op:g?0:op,dc:val('ad')});save();flash(`${g?'Group':'Ledger'} "${e(n)}" added.`)}
+function sa(q){q=q.toLowerCase();document.querySelectorAll('#tree .lg').forEach(x=>x.hidden=!!q&&!x.textContent.toLowerCase().includes(q));document.querySelectorAll('#tree details').forEach(d=>{d.open=!!q&&[...d.querySelectorAll('.lg')].some(x=>!x.hidden)})}
+function restore(){let j;try{j=JSON.parse(val('bi'))}catch(x){return flash('This text is not a valid export.')}
+if(!j||!Array.isArray(j.groups)||!Array.isArray(j.members))return flash('This text is not a valid export.');
+if(!confirm('Replace all current data with this backup?'))return;S=Object.assign({groups:[],members:[],tickets:[],auctions:[],pays:[],agents:[],adjs:[],n:1},j);save();flash('Data restored.')}
+function go(k){tab=k;msg='';render()}
+const MOD={home:['Home',[['',[['dash','Home']]]]],
+chit:['Chit Management',[['Masters',[['grp','Chit groups'],['mem','Members'],['agt','Agents']]],['Transactions',[['enr','Enroll members'],['auc','Monthly auction'],['col','Collections'],['adj','Adjustments']]]]],
+acc:['Accounts',[['Masters',[['a1','Chart of accounts']]],['Transactions',[['a2','Vouchers'],['a3','Bank reconciliation']]],['Reports',[['a4','Day book and ledger'],['a5','Trial balance and balance sheet']]]]],
+rep:['Reports',[['Chit reports',[['out','Outstanding'],['rau','Auction register'],['rrc','Receipts'],['rfd','Fixed deposits'],['rad','Adjustments']]]]],
+uti:['Utilities',[['',[['bk','Backup and restore'],['dm','Demo data and reset']]]]],
+oth:['Others',[['',[['o1','Suit file'],['o2','Guarantor and security'],['o3','SMS and WhatsApp']]]]]};
+const modOf=k=>Object.keys(MOD).find(m=>MOD[m][1].some(([h,a])=>a.some(x=>x[0]==k)))||'home';
+const PLAN={a2:['Vouchers','Receipt, payment, journal and contra vouchers, plus automatic vouchers from collections, prize payments and commission.'],a3:['Bank reconciliation','Match the bank statement with the bank ledger.'],a4:['Day book and ledger','Day book, cash book, bank book and ledger reports.'],a5:['Trial balance and balance sheet','Trial balance, profit and loss, and balance sheet.'],o1:['Suit file','Move a defaulter to a legal case, with notices, hearing dates, legal expenses and recovery.'],o2:['Guarantor and security','Guarantor details and security documents for each ticket, with verification.'],o3:['SMS and WhatsApp','Reminders for installments and auction dates.']};
+const PH={a1:['Chart of accounts','Your account groups and ledgers. Add new ones and set opening balances.'],adj:['Adjustments','Cancel, bid payable, advance subscription and general (collected charges) adjustments.'],rad:['Adjustment register','All adjustments made against tickets.'],dash:['Home','What needs your attention, and where to start.'],grp:['Chit groups','Create a group with its rules and fixed deposit. Do this first.'],agt:['Agents','People who enroll members or collect installments. They are registered like members.'],mem:['Members','Register each person once. A person can be a member, an agent and a guarantor.'],enr:['Enroll members','Put a registered member into a group, and choose the nominee and agents.'],auc:['Monthly auction','Record the winner and the prize. The dividend is worked out for you.'],col:['Collections','Receive the subscription and charges from a member.'],out:['Outstanding','See what is due, by group, member, position or collection agent.'],rau:['Auction register','All auctions of all groups.'],rrc:['Receipts','Every receipt received, newest first.'],rfd:['Fixed deposits','The fixed deposit of each group and its status.'],bk:['Backup and restore','Save a copy of all data, or restore an earlier copy.'],dm:['Demo data and reset','Try the software with sample data, or clear everything.']};
+Object.keys(PLAN).forEach(k=>PH[k]=[PLAN[k][0],'Planned for a later version.']);
+const head=()=>`<div class="ph"><h2 class="pt">${PH[tab][0]}</h2><p class="hint" style="margin:0">${PH[tab][1]}</p></div>`;
+const soon=()=>`<section><h2>Planned for a later version</h2><p style="margin:0 0 6px">${e(PLAN[tab][1])}</p><p class="hint" style="margin:0">Tell me when you want this module built.</p></section>`;
+function gm(m){go(MOD[m][1][0][1][0][0])}
+function render(){const md=modOf(tab);
+$('#mods').innerHTML=Object.keys(MOD).map(m=>`<button class="${m==md?'on':''}" onclick="gm('${m}')">${MOD[m][0]}</button>`).join('');
+$('#nav').innerHTML=MOD[md][1].map(([h,a])=>(h?`<h4>${h}</h4>`:'')+a.map(([k,l])=>`<button class="${k==tab?'on':''}" onclick="go('${k}')">${l}</button>`).join('')).join('');
+$('#main').innerHTML=head()+(msg?`<p class="msg">${msg}</p>`:'')+(views[tab]||soon)();msg='';if($('#rp'))fillRoles();if($('#ci'))ci(1);if($('#jx'))jctx();if(keep){document.querySelectorAll('#main input,#main select').forEach(x=>{if(x.id&&x.id in keep&&!x.disabled)x.value=keep[x.id]});keep=null}const c=$('#mc');if(c&&$('#rbox'))$('#rbox').hidden=c.value!='D';if($('#idc'))chk();if($('#rv')&&ms==5)rev();if($('#ct2'))tot();if($('#cmo'))cmd()}
+render();
+</script></body></html>
